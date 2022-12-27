@@ -50,7 +50,7 @@ Go ahead and place the corresponding `Unity_v2021.x.ulf` file in the same `activ
 
 ## Creating a New Unity Project
 ```bash
-cat << HERE > script.sh
+cat << 'HERE' > /tmp/script.sh
 unity-editor \
     -logFile /dev/stdout \
     -quit \
@@ -69,7 +69,7 @@ docker run \
   --env UNITY_PASSWORD \
   --volume "${PWD}/activate/Unity_v2021.x.ulf:/UnityLicense.ulf" \
   --volume "${PWD}/unity:/unity" \
-  --volume "${PWD}/script.sh:/script.sh" \
+  --volume "/tmp/script.sh:/script.sh" \
   --workdir /unity \
   unityci/editor:ubuntu-2021.3.13f1-base-1.0.1 \
   bash -c 'chmod +x /script.sh; /script.sh'
@@ -79,4 +79,46 @@ At the end of this process, you'll have a new directory `unity` with a new unity
 You may want to take this opportunity to add a unity specific `.gitignore` for your newly created unity project.
 
 ## Running Tests
+```bash
+cat << 'HERE' > /tmp/script.sh
+unity-editor \
+    -logFile /dev/stdout \
+    -quit \
+    -manualLicenseFile /UnityLicense.ulf
+
+unity-editor \
+    -logFile /dev/stdout \
+    -quit \
+    -projectPath /unity/sampleProject \
+    -runTests \
+    -testResults /test_results/edit_mode_results.xml \
+    -testPlatform EditMode \
+    -enableCodeCoverage \
+    -debugCodeOptimization
+
+unity-editor \
+    -logFile /dev/stdout \
+    -quit \
+    -projectPath /unity/sampleProject \
+    -runTests \
+    -testResults /test_results/play_mode_results.xml \
+    -testPlatform PlayMode \
+    -enableCodeCoverage \
+    -debugCodeOptimization
+HERE
+
+docker run \
+  --interactive \
+  --tty \
+  --rm \
+  --env UNITY_EMAIL \
+  --env UNITY_PASSWORD \
+  --volume "${PWD}/activate/Unity_v2021.x.ulf:/UnityLicense.ulf" \
+  --volume "${PWD}/unity:/unity" \
+  --volume "/tmp/script.sh:/script.sh" \
+  --volume "${PWD}/builds:/builds" \
+  --workdir /unity \
+  unityci/editor:ubuntu-2021.3.13f1--1.0.1 \
+  bash -c 'chmod +x /script.sh; /script.sh'
+```
 ## Producing Builds

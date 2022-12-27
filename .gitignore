@@ -1,3 +1,5 @@
 .idea
 activate
 .DS_Store
+test_results
+builds
